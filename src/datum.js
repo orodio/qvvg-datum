@@ -12,6 +12,7 @@ const register = (opts = {}) => {
     name: opts.name,
     label: opts.label || "*",
     color: genColor(),
+    debug: opts.debug || false,
   }
   if (opts.name != null) via[opts.name] = pid
   return pid
@@ -22,6 +23,21 @@ const whereIs = address => {
   if (via[address] != null) address = via[address]
   if (registry[address] != null) pid = address
   return pid
+}
+
+const log = {
+  pid(pid) {
+    const { color, name, pid, label } = registry[pid]
+    const value = `%c${name || pid}<${label}>`
+    const styles = [`color:${color};font-family:monospace;`]
+    return [value, styles]
+  },
+  log(pid, ...rest) {
+    pid = whereIs(pid)
+    if (pid == null || !register[pid].debug) return
+    const [p, ps] = log.pid(pid)
+    console.log([p].join(" "), ...ps, ...rest)
+  },
 }
 
 const deliver = (address, msg) => {
@@ -65,6 +81,7 @@ export const send = (opts, value) =>
 function Context(pid, extra = {}) {
   if (!(this instanceof Context)) return new Context(...arguments)
   this.self = () => registry[pid].name || pid
+  this.label = () => registry[pid].label
   this.extra = extra
   this.receive = () => receive(pid)
 }
