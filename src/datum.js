@@ -27,7 +27,7 @@ const whereIs = address => {
 
 const log = {
   pid(pid) {
-    const { color, name, pid, label } = registry[pid]
+    const { color, name, label } = registry[pid]
     const value = `%c${name || pid}<${label}>`
     const styles = [`color:${color};font-family:monospace;`]
     return [value, styles]
