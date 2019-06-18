@@ -55,7 +55,7 @@ function Message(opts = {}) {
 export const send = (opts, value) =>
   new Promise(resolve => {
     setTimeout(() => {
-      if (typeof opts === "string") opts = { to: opts }
+      if (typeof opts === "number" || typeof opts === "string") opts = { to: opts }
       opts.value = opts.value || value
       const message = Message(opts)
       return resolve(deliver(message.to, message))
@@ -82,3 +82,5 @@ export const spawn = (callback = noop, initState = null, opts = {}) => {
 
   return opts.name || pid
 }
+
+export const exposeRegistry = () => registry
