@@ -86,6 +86,7 @@ function Context(pid, extra = {}) {
   this.label = () => registry[pid].label
   this.extra = extra
   this.receive = () => receive(pid)
+  this.log = (...args) => lol.log(pid, ...args)
 }
 
 const noop = _ => null
@@ -98,6 +99,12 @@ export const spawn = (callback = noop, initState = null, opts = {}) => {
   var pid = register(opts)
 
   setTimeout(async () => {
+    if (typeof callback === "object") {
+      const node = callback.node || {}
+      opts.label = opts.label || node.label || "*"
+      opts.name = opts.name || node.withName(initState, label) || undefined
+      callback = callback.callback
+    }
     const reason = await callback(Context(pid, opts.inject || {}), initState)
     log.log(pid, "kill", reason)
     kill(pid)
