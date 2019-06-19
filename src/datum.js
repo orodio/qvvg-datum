@@ -100,7 +100,7 @@ export const spawn = (callback = noop, initState = null, opts = {}) => {
   if (typeof callback === "object") {
     const node = callback.node || {}
     opts.label = opts.label || node.label || "*"
-    opts.name = opts.name || node.withName(initState, opts.label) || undefined
+    opts.name = opts.name || (node.withName != null && node.withName(initState, opts.label)) || undefined
     opts.debug = opts.debug || node.debug || false
     callback = callback.callback
   }
