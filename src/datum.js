@@ -34,7 +34,7 @@ const log = {
   },
   log(pid, ...rest) {
     pid = whereIs(pid)
-    if (pid == null || !register[pid].debug) return
+    if (pid == null || !registry[pid].debug) return
     const [p, ps] = log.pid(pid)
     console.log([p].join(" "), ...ps, ...rest)
   },
@@ -74,7 +74,9 @@ export const send = (opts, value) =>
       if (typeof opts === "number" || typeof opts === "string") opts = { to: opts }
       opts.value = opts.value || value
       const message = Message(opts)
-      return resolve(deliver(message.to, message))
+      const sent = deliver(message.to, message)
+      sent ? log.log(message.to, "was sent", message) : log.log(message.to, "could not be deliverd", message)
+      return resolve(sent)
     }, 0)
   })
 
@@ -89,14 +91,19 @@ function Context(pid, extra = {}) {
 const noop = _ => null
 
 export const spawn = (callback = noop, initState = null, opts = {}) => {
-  if (whereIs(opts.name)) return opts.name
+  if (whereIs(opts.name)) {
+    log.log(opts.name, "Already Started")
+    return opts.name
+  }
   var pid = register(opts)
 
   setTimeout(async () => {
     const reason = await callback(Context(pid, opts.inject || {}), initState)
+    log.log(pid, "kill", reason)
     kill(pid)
   }, 0)
 
+  log.log(pid, "Started")
   return opts.name || pid
 }
 
